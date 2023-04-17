@@ -1,18 +1,21 @@
 # Current
 
-- [ ] Topics
-  - [x] Improve topic suggestions and rendering
-  - [x] Add topic search, keep cache of topics
-  - [x] Ability to create custom feeds
-    - [ ] Bookmark icon opens "create feed" dialog with form pre-filled
-    - [ ] Add ability to follow topics - bookmark icon?
-    - [ ] Claim relays bounty
-    - [ ] Add person to feed button (maybe lists make more sense for this?)
+- [ ] Relays bounty
+  - [ ] Ability to create custom feeds
+- [ ] Fix tag-style event mentions. Probably transform all mentions into entities in parse
 - [ ] Some lnurls aren't working npub1y3k2nheva29y9ej8a22e07epuxrn04rvgy28wvs54y57j7vsxxuq0gvp4j
-- [ ] Global search modal that searches within current feed
-- [ ] Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
+- [ ] Fix performance issues
+  - [ ] https://github.com/techfort/LokiJS
+    - Use indexed adapter github.com/techfort/LokiJS/blob/master/tutorials/Persistence%20Adapters.md and partitioning adapter
+    - Call close onbeforeunload to save pending changes
+  - Fix force relays on login: http://localhost:5173/messages/npub1l66wvfm7dxhd6wmvpukpjpyhvwtlxzu0qqajqxjfpr4rlfa8hl5qlkfr3q
+- [ ] Fix iOS/safari/firefox
+- [ ] Revisit profile page and info
+  - [ ] Add zaps to likes tab
+- [ ] Sort DMs, remember message status
 - [ ] Image classification
   - https://github.com/bhky/opennsfw2
+  - Requires updating my OS -_-
 
 # Custom views
 
@@ -22,7 +25,6 @@
 
 # Core
 
-- [ ] Make mutes private
 - [ ] Write multi-relay pagination into paravel and open source it
   - https://github.com/nostr-protocol/nips/pull/408
   - nevent1qqszpjf3307ccam3cl957yc7k3h5c7vpt7gz2vdzgwkqszsyvdj6e0cpzfmhxue69uhk7enxvd5xz6tw9ec82csgdxq30
@@ -61,7 +63,6 @@
 
 # UI/Features
 
-- [ ] Remember message/chat status
 - [ ] Linkify topics
 - [ ] Add suggestion list for topics on compose
 - [ ] Badges link to https://badges.page/p/97c70a44366a6535c145b333f973ea86dfdc2d7a99da618c40c64705ad98e322
@@ -72,7 +73,7 @@
 - [ ] Review QR codes, search, basic affordances for link navigation
 - [ ] Add delete button to notes
 - [ ] Log in as user button
-- [ ] Separate notifications out by type, mute certain kinds. Likes are extraneous
+- [ ] Separate notifications out by type, mute certain kinds
 - [ ] Relay recommendations based on follows/followers
 - [ ] Make the note relays button modal make sense, one relay with no explanation is not good
 - [ ] Linkify invoices

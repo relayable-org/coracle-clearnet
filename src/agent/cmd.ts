@@ -1,9 +1,10 @@
 import {map, pick, last, uniqBy} from "ramda"
 import {get} from "svelte/store"
 import {doPipe} from "hurdak/lib/hurdak"
-import {parseContent, Tags, roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
+import {parseContent} from "src/util/html"
+import {Tags, roomAttrs, displayPerson, findReplyId, findRootId} from "src/util/nostr"
 import {getRelayForPersonHint} from "src/agent/relays"
-import {getPersonWithFallback} from "src/agent/db"
+import {getPersonWithFallback} from "src/agent/tables"
 import pool from "src/agent/pool"
 import sync from "src/agent/sync"
 import keys from "src/agent/keys"
@@ -34,9 +35,6 @@ const setRelays = newRelays =>
 const setPetnames = petnames => new PublishableEvent(3, {tags: petnames})
 
 const setMutes = mutes => new PublishableEvent(10000, {tags: mutes})
-
-const setFeeds = feeds =>
-  new PublishableEvent(30078, {content: JSON.stringify(feeds), tags: [["d", "coracle/feeds"]]})
 
 const createRoom = room =>
   new PublishableEvent(40, {content: JSON.stringify(pick(roomAttrs, room))})
@@ -113,7 +111,7 @@ const processMentions = map(pubkey => {
 const tagsFromContent = (content, tags) => {
   const seen = new Set(Tags.wrap(tags).values().all())
 
-  for (const {type, value} of parseContent({content})) {
+  for (const {type, value} of parseContent(content)) {
     if (type.match(/nostr:(note|nevent)/) && !seen.has(value.id)) {
       tags = tags.concat([["e", value.id]])
       seen.add(value.id)
@@ -172,7 +170,7 @@ class PublishableEvent {
     const createdAt = Math.round(new Date().valueOf() / 1000)
 
     if (tagClient) {
-      tags = tags.filter(t => t[0] !== "client").concat([["client", "coracle"]])
+      tags.push(["client", "coracle"])
     }
 
     this.event = {kind, content, tags, pubkey, created_at: createdAt}
@@ -202,7 +200,6 @@ export default {
   setRelays,
   setPetnames,
   setMutes,
-  setFeeds,
   createRoom,
   updateRoom,
   createChatMessage,

@@ -9,7 +9,12 @@ import {
   mergeDeepRight,
   aperture,
   filter,
+  path as getPath,
+  allPass,
+  pipe,
   isNil,
+  complement,
+  equals,
   is,
   pluck,
   sum,
@@ -120,10 +125,8 @@ export const poll = (t, cb) => {
   }
 }
 
-export const createScroller = (loadMore, {reverse = false, element = null} = {}) => {
+export const createScroller = (loadMore, {reverse = false, element = document.body} = {}) => {
   const THRESHOLD = 2000
-
-  element = element || document.body
 
   // NOTE TO FUTURE SELF
   // If the scroller is saturating request channels on a slow relay, the
@@ -170,7 +173,7 @@ export class Cursor {
   until: number
   limit: number
   count: number
-  constructor({limit = 20, delta = undefined} = {}) {
+  constructor({limit = 50, delta = undefined} = {}) {
     this.delta = delta
     this.since = delta ? now() - delta : undefined
     this.until = now()
@@ -262,6 +265,42 @@ export const defer = (): Deferred<any> => {
 }
 
 export const avg = xs => sum(xs) / xs.length
+
+export const where = filters =>
+  allPass(
+    Object.entries(filters).map(([key, value]) => {
+      /* eslint prefer-const: 0 */
+      let [field, operator = "eq"] = key.split(":")
+      let test,
+        modifier = identity,
+        parts = field.split(".")
+
+      if (operator.startsWith("!")) {
+        operator = operator.slice(1)
+        modifier = complement
+      }
+
+      if (operator === "eq" && is(Array, value)) {
+        test = v => (value as Array<any>).includes(v)
+      } else if (operator === "eq") {
+        test = equals(value)
+      } else if (operator === "lt") {
+        test = v => (v || 0) < value
+      } else if (operator === "lte") {
+        test = v => (v || 0) <= value
+      } else if (operator === "gt") {
+        test = v => (v || 0) > value
+      } else if (operator === "gte") {
+        test = v => (v || 0) >= value
+      } else if (operator === "nil") {
+        test = isNil
+      } else {
+        throw new Error(`Invalid operator ${operator}`)
+      }
+
+      return pipe(getPath(parts), modifier(test))
+    })
+  )
 
 // https://stackoverflow.com/a/21682946
 export const stringToHue = value => {
@@ -406,8 +445,8 @@ export const annotateMedia = url => {
   }
 }
 
-export class WritableList<T> {
-  _store: Writable<Array<T>>
+export class WritableList {
+  _store: Writable<Array<any>>
   constructor(init) {
     this._store = writable(init)
   }

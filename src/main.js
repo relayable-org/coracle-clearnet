@@ -1,8 +1,8 @@
 import "src/app.css"
 
 import Bugsnag from "@bugsnag/js"
-import App from "src/app/App.svelte"
-import {installPrompt} from "src/partials/state"
+import App from "src/App.svelte"
+import {installPrompt} from "src/app/ui"
 
 Bugsnag.start({
   apiKey: "2ea412feabfe14dc9849c6f0b4fa7003",

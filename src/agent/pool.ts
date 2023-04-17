@@ -13,21 +13,8 @@ const Config = {
   authHandler: null,
 }
 
-type StatsItem = {
-  error: string | null
-  timeouts: number
-  subsCount: number
-  eoseCount: number
-  eoseTimer: number
-  eventsCount: number
-  activeSubsCount: number
-  lastRequest: number
-  openedAt: number
-  closedAt: number
-}
-
 const Meta = {
-  stats: {} as Record<string, StatsItem>,
+  stats: {},
   errors: {},
   getStats(url) {
     if (!this.stats[url]) {

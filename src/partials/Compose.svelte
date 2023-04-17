@@ -3,10 +3,10 @@
   import {last, pluck, propEq} from "ramda"
   import {fuzzy} from "src/util/misc"
   import {displayPerson} from "src/util/nostr"
-  import PersonBadge from "src/app/shared/PersonBadge.svelte"
+  import Badge from "src/partials/Badge.svelte"
   import ContentEditable from "src/partials/ContentEditable.svelte"
   import Suggestions from "src/partials/Suggestions.svelte"
-  import {watch} from "src/agent/db"
+  import {watch} from "src/agent/storage"
   import {getPubkeyWriteRelays} from "src/agent/relays"
 
   export let onSubmit
@@ -27,7 +27,7 @@
   }
 
   const searchPeople = watch("people", t => {
-    return fuzzy(t.all({"kind0.name": {$type: "string"}}), {keys: ["kind0.name", "pubkey"]})
+    return fuzzy(t.all({"kind0.name:!nil": null}), {keys: ["kind0.name", "pubkey"]})
   })
 
   const applySearch = word => {
@@ -43,9 +43,7 @@
     return {selection, node, offset, word}
   }
 
-  const autocomplete = ({person = null, force = false} = {}) => {
-    let completed = false
-
+  const autocomplete = ({person}) => {
     const {selection, node, offset, word} = getInfo()
 
     const annotate = (prefix, text, value) => {
@@ -69,23 +67,19 @@
       selection.collapse(span.nextSibling, 0)
       selection.getRangeAt(0).insertNode(space)
       selection.collapse(space, 2)
-
-      completed = true
     }
 
     // Mentions
-    if ((force || word.length > 1) && word.startsWith("@")) {
+    if (word.length > 1 && word.startsWith("@")) {
       annotate("@", displayPerson(person).trim(), pubkeyEncoder.encode(person.pubkey))
     }
 
     // Topics
-    if ((force || word.length > 1) && word.startsWith("#")) {
+    if (word.length > 1 && word.startsWith("#")) {
       annotate("#", word.slice(1), word.slice(1))
     }
 
     suggestions.setData([])
-
-    return completed
   }
 
   const onKeyDown = e => {
@@ -107,13 +101,6 @@
     // Enter adds a newline, so do it on key down
     if (["Enter"].includes(e.code)) {
       autocomplete({person: suggestions.get()})
-    }
-
-    // Only autocomplete topics on space
-    if (["Space"].includes(e.code)) {
-      if (autocomplete()) {
-        e.preventDefault()
-      }
     }
   }
 
@@ -152,7 +139,7 @@
     selection.getRangeAt(0).insertNode(spaceNode)
     selection.collapse(input, 1)
 
-    autocomplete({person, force: true})
+    autocomplete({person})
   }
 
   const createNewLines = (n = 1) => {
@@ -201,6 +188,6 @@
 
 <Suggestions bind:this={suggestions} select={person => autocomplete({person})}>
   <div slot="item" let:item>
-    <PersonBadge inert person={item} />
+    <Badge inert person={item} />
   </div>
 </Suggestions>

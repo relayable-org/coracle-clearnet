@@ -12,5 +12,5 @@
      border-white bg-cover bg-center`
   )}
   style="background-image: url({src}); {$$props.style || ''}">
-  <slot />
+  <slot></slot>
 </div>

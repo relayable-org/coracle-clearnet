@@ -10,9 +10,6 @@
   export let placement = "top"
   export let interactive = true
   export let arrow = false
-  export let opts = {} as {
-    hideOnClick?: boolean
-  }
 
   let trigger
   let tooltip
@@ -20,7 +17,6 @@
 
   onMount(() => {
     instance = tippy(trigger, {
-      ...opts,
       theme,
       arrow,
       placement: placement as Placement,
@@ -37,7 +33,7 @@
           instance.popper.querySelector(".tippy-content").appendChild(tooltipContents)
           instance.popper.addEventListener("mouseleave", e => instance.hide())
           instance.popper.addEventListener("click", e => {
-            if (e.target.closest(".tippy-close") || opts.hideOnClick) {
+            if (e.target.closest(".tippy-close")) {
               instance.hide()
             }
           })

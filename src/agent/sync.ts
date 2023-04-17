@@ -1,4 +1,4 @@
-import {uniq, nth, objOf, pick, identity} from "ramda"
+import {uniq, pick, identity} from "ramda"
 import {nip05} from "nostr-tools"
 import {noop, ensurePlural, chunk} from "hurdak/lib/hurdak"
 import {
@@ -13,7 +13,7 @@ import {
   hash,
 } from "src/util/misc"
 import {Tags, roomAttrs, isRelay, isShareableRelay, normalizeRelayUrl} from "src/util/nostr"
-import {topics, people, userEvents, relays, rooms, routes} from "src/agent/db"
+import {people, userEvents, relays, rooms, routes} from "src/agent/tables"
 import {uniqByUrl} from "src/agent/relays"
 import user from "src/agent/user"
 
@@ -31,7 +31,7 @@ const processEvents = async events => {
   for (let i = 0; i < chunks.length; i++) {
     for (const event of chunks[i]) {
       if (event.pubkey === userPubkey) {
-        userEvents.patch(event)
+        userEvents.put(event)
       }
 
       for (const handler of handlers[event.kind] || []) {
@@ -57,15 +57,15 @@ const updatePerson = (pubkey, data) => {
   }
 }
 
-const verifyNip05 = (pubkey, alias) =>
-  nip05.queryProfile(alias).then(result => {
+const verifyNip05 = (pubkey, as) =>
+  nip05.queryProfile(as).then(result => {
     if (result?.pubkey === pubkey) {
-      updatePerson(pubkey, {verified_as: alias})
+      updatePerson(pubkey, {verified_as: as})
 
       if (result.relays?.length > 0) {
         const urls = result.relays.filter(isRelay)
 
-        relays.patch(urls.map(url => ({url: normalizeRelayUrl(url)})))
+        relays.bulkPatch(urls.map(url => ({url: normalizeRelayUrl(url)})))
 
         urls.forEach(url => {
           addRoute(pubkey, url, "nip05", "write", now())
@@ -221,15 +221,6 @@ addHandler(
   })
 )
 
-addHandler(
-  30078,
-  profileHandler("feeds", (e, p) => {
-    if (Tags.from(e).type("d").values().first() === "coracle/feeds") {
-      return tryJson(() => JSON.parse(e.content))
-    }
-  })
-)
-
 // Rooms
 
 addHandler(40, e => {
@@ -308,7 +299,7 @@ const addRoute = (pubkey, rawUrl, type, mode, created_at) => {
       url: route.url,
     })
 
-    routes.patch({
+    routes.put({
       ...route,
       count: newCount,
       score: newTotalScore / newCount,
@@ -349,18 +340,5 @@ addHandler(10002, e => {
     }
   })
 })
-
-// Topics
-
-const processTopics = e => {
-  const matches = Array.from(e.content.toLowerCase().matchAll(/#(\w{2,100})/g))
-
-  if (matches.length > 0) {
-    topics.patch(matches.map(nth(1)).map(objOf("name")))
-  }
-}
-
-addHandler(1, processTopics)
-addHandler(42, processTopics)
 
 export default {processEvents}
