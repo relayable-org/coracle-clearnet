@@ -25,9 +25,9 @@
     <Anchor
       external
       type="unstyled"
-      href="https://info.coracle.social"
+      href="https://relayable.org/toracle"
       class="flex items-center gap-2">
-      <img alt="Coracle Logo" src="/images/logo.png" class="w-8" />
+      <img alt="Toracle Logo" src="/images/logo.png" class="w-8" />
       <h1 class="staatliches text-3xl">Coracle</h1>
     </Anchor>
     <i class="fa fa-lightbulb cursor-pointer text-lg" on:click={toggleTheme} />
